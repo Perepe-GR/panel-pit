@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel del pit · Lap Timer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+  :root { --bg:#0B0D10; --card:#12161B; --muted:#9AA3AE; --text:#F2F4F7; --green:#C6F432; --red:#FF5A5F; --amber:#F5A524; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; font-size:13px; color:var(--muted); font-weight:600; }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:#555; margin-right:6px; }
+  main { display:grid; gap:10px; padding:0 10px 14px; grid-template-columns: 1fr; max-width:1100px; margin:0 auto; }
+  @media (min-width: 800px) { main { grid-template-columns: 1fr 1fr; } .wide { grid-column: 1 / -1; } }
+  .card { background:var(--card); border-radius:16px; padding:14px 16px; }
+  .label { font-size:12px; letter-spacing:.1em; color:var(--muted); font-weight:700; text-transform:uppercase; }
+  .delta { font-size:92px; font-weight:800; line-height:1; font-variant-numeric: tabular-nums; margin:6px 0; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:90px; }
+  .val { font-size:26px; font-weight:800; font-variant-numeric: tabular-nums; }
+  .small { font-size:13px; color:var(--muted); }
+  #map { height:300px; border-radius:12px; margin-top:8px; }
+  table { width:100%; border-collapse:collapse; font-variant-numeric: tabular-nums; font-size:14px; }
+  td, th { text-align:left; padding:5px 6px; border-bottom:1px solid #1E242B; }
+  th { color:var(--muted); font-size:12px; }
+  .best { color:var(--green); font-weight:700; }
+  input, button { font:inherit; border-radius:10px; border:1px solid #2A313A; background:#0B0D10; color:var(--text); padding:10px 12px; }
+  input { width:100%; }
+  button { cursor:pointer; background:#1E242B; font-weight:700; }
+  button.primary { background:var(--amber); color:#141413; border-color:var(--amber); }
+  .quick { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin:8px 0; }
+  #cfg { display:none; }
+  .err { color:var(--red); font-size:13px; margin-top:6px; }
+  .demo { background:var(--amber); color:#141413; border-radius:6px; padding:1px 8px; font-size:12px; font-weight:800; margin-left:8px; }
+</style>
+</head>
+<body>
+<header>
+  <div><span class="dot" id="dot"></span><span id="status">Sin configurar</span><span id="demoTag"></span></div>
+  <div>Sala <b id="roomShow">-</b> · <a href="#" id="cfgLink" style="color:var(--green)">ajustes</a></div>
+</header>
+
+<main>
+  <section class="card wide" id="cfg">
+    <div class="label">Conexión</div>
+    <p class="small">URL de Firebase Realtime Database y código de sala (el mismo que en la app del piloto).</p>
+    <input id="dbIn" placeholder="https://tu-proyecto-default-rtdb.firebaseio.com" style="margin-bottom:8px">
+    <input id="roomIn" placeholder="CÓDIGO DE SALA" style="margin-bottom:8px">
+    <button class="primary" id="saveCfg">Guardar y conectar</button>
+  </section>
+
+  <section class="card">
+    <div class="label">Delta</div>
+    <div class="delta" id="delta">—.—</div>
+    <div class="row">
+      <div><div class="label">Vuelta</div><div class="val" id="lap">-</div></div>
+      <div><div class="label">Sector</div><div class="val" id="sector">-</div></div>
+      <div><div class="label">Velocidad</div><div class="val" id="kmh">-</div></div>
+      <div><div class="label">Batería</div><div class="val" id="bat">-</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="label">Tiempos</div>
+    <div class="row" style="margin-top:6px">
+      <div><div class="label">En curso</div><div class="val" id="cur">--:--.---</div></div>
+      <div><div class="label">Última</div><div class="val" id="last">--:--.---</div></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><div class="label">Mejor</div><div class="val" id="best" style="color:var(--green)">--:--.---</div></div>
+      <div><div class="label">Óptima</div><div class="val" id="opt">--:--.---</div></div>
+    </div>
+    <div class="small" style="margin-top:10px" id="circ">-</div>
+    <div class="small" id="age">-</div>
+  </section>
+
+  <section class="card">
+    <div class="label">Posición</div>
+    <div id="map"></div>
+    <label class="small"><input type="checkbox" id="follow" checked style="width:auto"> Seguir al piloto</label>
+  </section>
+
+  <section class="card">
+    <div class="label">Mensaje al piloto (solo texto en pantalla, sin sonido)</div>
+    <div class="quick">
+      <button data-msg="BOX">BOX</button>
+      <button data-msg="+1 VUELTA">+1 VUELTA</button>
+      <button data-msg="LENTO">LENTO</button>
+      <button data-msg="ATENCIÓN">ATENCIÓN</button>
+      <button data-msg="TODO OK">TODO OK</button>
+      <button data-msg="AFLOJA">AFLOJA</button>
+    </div>
+    <div style="display:flex; gap:8px">
+      <input id="msg" maxlength="120" placeholder="Mensaje corto">
+      <button class="primary" id="send">Enviar</button>
+    </div>
+    <div class="small" id="sent" style="margin-top:6px">Llega al móvil del piloto en el siguiente intercambio (hasta 10 s o el intervalo que tenga configurado).</div>
+    <div class="err" id="err"></div>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Últimas vueltas</div>
+    <table>
+      <thead><tr><th>Vuelta</th><th>Tiempo</th><th>Sectores</th></tr></thead>
+      <tbody id="laps"><tr><td colspan="3" class="small">Sin vueltas todavía</td></tr></tbody>
+    </table>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const q = new URLSearchParams(location.search);
+let db = (q.get('db') || localStorage.getItem('db') || '').replace(/\/+$/, '');
+let room = (q.get('room') || localStorage.getItem('room') || '').toUpperCase();
+if (q.get('db')) localStorage.setItem('db', db);
+if (q.get('room')) localStorage.setItem('room', room);
+
+function fmt(ms) {
+  if (ms == null) return '--:--.---';
+  const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000), t = ms % 1000;
+  return m + ':' + String(s).padStart(2, '0') + '.' + String(t).padStart(3, '0');
+}
+function sec(ms) { return (ms / 1000).toFixed(2); }
+
+const map = L.map('map').setView([40.4, -3.7], 5);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+const trail = L.polyline([], { color: '#C6F432', weight: 3 }).addTo(map);
+let marker = null, firstFix = true, lastT = 0;
+
+function setStatus(ok, text) {
+  $('dot').style.background = ok ? '#C6F432' : '#FF5A5F';
+  $('status').textContent = text;
+}
+
+function render(d) {
+  const live = d && d.live;
+  if (!live) { setStatus(true, 'Conectado, esperando datos del piloto'); return; }
+  setStatus(true, 'Conectado');
+  $('demoTag').innerHTML = live.demo ? '<span class="demo">DEMO</span>' : '';
+  const dl = live.delta;
+  $('delta').textContent = dl == null ? '—.—' : (dl > 0 ? '+' : '') + dl.toFixed(3);
+  $('delta').style.color = dl == null || dl <= 0 ? '#C6F432' : '#FF5A5F';
+  $('lap').textContent = live.lap != null ? live.lap : '-';
+  $('sector').textContent = live.sector != null ? live.sector + '/' + live.sectores : '-';
+  $('kmh').textContent = live.kmh != null ? live.kmh + ' km/h' : '-';
+  $('bat').textContent = live.bat != null ? live.bat + ' %' : '-';
+  $('cur').textContent = fmt(live.cur);
+  $('last').textContent = fmt(live.last);
+  $('best').textContent = fmt(live.best);
+  $('opt').textContent = fmt(live.opt);
+  $('circ').textContent = (live.circuito || 'Sin circuito') + (live.v ? ' · app ' + live.v : '');
+  const age = Math.max(0, Math.round((Date.now() - live.t) / 1000));
+  $('age').textContent = 'Último dato hace ' + age + ' s';
+  if (live.lat != null && live.t !== lastT) {
+    lastT = live.t;
+    const p = [live.lat, live.lon];
+    trail.addLatLng(p);
+    if (!marker) marker = L.circleMarker(p, { radius: 8, color: '#F5A524', fillColor: '#F5A524', fillOpacity: 1 }).addTo(map);
+    else marker.setLatLng(p);
+    if (firstFix) { map.setView(p, 16); firstFix = false; }
+    else if ($('follow').checked) map.panTo(p);
+  }
+  const laps = d.laps ? Object.keys(d.laps).sort().map(k => d.laps[k]) : [];
+  if (laps.length) {
+    const bestMs = Math.min(...laps.map(l => l.ms));
+    $('laps').innerHTML = laps.slice(-10).reverse().map(l =>
+      '<tr><td>' + l.n + '</td><td class="' + (l.ms === bestMs ? 'best' : '') + '">' + fmt(l.ms) + '</td><td>' +
+      (l.s || []).map(sec).join(' · ') + '</td></tr>').join('');
+  }
+}
+
+async function poll() {
+  if (!db || !room) return;
+  try {
+    const r = await fetch(db + '/rooms/' + room + '.json', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    render(await r.json());
+  } catch (e) {
+    setStatus(false, 'Sin conexión con Firebase (' + e.message + ')');
+  }
+}
+
+async function send(text) {
+  text = (text || '').trim();
+  if (!text) return;
+  $('err').textContent = '';
+  try {
+    const r = await fetch(db + '/rooms/' + room + '/msgs.json', {
+      method: 'POST', body: JSON.stringify({ text: text, ts: Date.now() })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    $('sent').textContent = 'Enviado: «' + text + '» (' + new Date().toLocaleTimeString() + ')';
+    $('msg').value = '';
+  } catch (e) {
+    $('err').textContent = 'No se pudo enviar: ' + e.message;
+  }
+}
+
+document.querySelectorAll('button[data-msg]').forEach(b => b.addEventListener('click', () => send(b.dataset.msg)));
+$('send').addEventListener('click', () => send($('msg').value));
+$('msg').addEventListener('keydown', e => { if (e.key === 'Enter') send($('msg').value); });
+$('cfgLink').addEventListener('click', e => { e.preventDefault(); $('cfg').style.display = 'block'; });
+$('saveCfg').addEventListener('click', () => {
+  db = $('dbIn').value.trim().replace(/\/+$/, '');
+  room = $('roomIn').value.trim().toUpperCase();
+  localStorage.setItem('db', db); localStorage.setItem('room', room);
+  $('roomShow').textContent = room || '-';
+  $('cfg').style.display = 'none';
+  poll();
+});
+
+$('dbIn').value = db; $('roomIn').value = room;
+$('roomShow').textContent = room || '-';
+if (!db || !room) $('cfg').style.display = 'block';
+poll();
+setInterval(poll, 3000);
+</script>
+</body>
+</html>
