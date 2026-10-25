@@ -20,16 +20,22 @@
   .row > div { flex:1; min-width:90px; }
   .val { font-size:26px; font-weight:800; font-variant-numeric: tabular-nums; }
   .small { font-size:13px; color:var(--muted); }
-  #map { height:300px; border-radius:12px; margin-top:8px; }
+  #map { height:320px; border-radius:12px; margin-top:8px; }
   table { width:100%; border-collapse:collapse; font-variant-numeric: tabular-nums; font-size:14px; }
   td, th { text-align:left; padding:5px 6px; border-bottom:1px solid #1E242B; }
   th { color:var(--muted); font-size:12px; }
   .best { color:var(--green); font-weight:700; }
-  input, button { font:inherit; border-radius:10px; border:1px solid #2A313A; background:#0B0D10; color:var(--text); padding:10px 12px; }
-  input { width:100%; }
-  button { cursor:pointer; background:#1E242B; font-weight:700; }
+  input[type=text], input:not([type]) { font:inherit; width:100%; border-radius:10px; border:1px solid #2A313A; background:#0B0D10; color:var(--text); padding:10px 12px; }
+  button { font:inherit; border-radius:10px; border:1px solid #2A313A; background:#1E242B; color:var(--text); padding:10px 12px; font-weight:800; cursor:pointer; }
   button.primary { background:var(--amber); color:#141413; border-color:var(--amber); }
-  .quick { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin:8px 0; }
+  .quick { display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin:8px 0; }
+  @media (min-width: 800px) { .quick { grid-template-columns: repeat(4, 1fr); } }
+  .quick button { min-height:54px; border:0; }
+  .pill { background:rgba(20,20,19,.9); color:#fff; padding:2px 8px; border-radius:6px; }
+  .swatches { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; }
+  .swatch { width:44px; height:44px; border-radius:10px; border:3px solid transparent; padding:0; }
+  .swatch.sel { border-color:#fff; }
+  #preview { border-radius:12px; padding:14px; text-align:center; font-weight:800; font-size:20px; margin:8px 0; min-height:52px; }
   #cfg { display:none; }
   .err { color:var(--red); font-size:13px; margin-top:6px; }
   .demo { background:var(--amber); color:#141413; border-radius:6px; padding:1px 8px; font-size:12px; font-weight:800; margin-left:8px; }
@@ -75,27 +81,17 @@
     <div class="small" id="age">-</div>
   </section>
 
-  <section class="card">
-    <div class="label">Posición</div>
-    <div id="map"></div>
-    <label class="small"><input type="checkbox" id="follow" checked style="width:auto"> Seguir al piloto</label>
-  </section>
-
-  <section class="card">
+  <section class="card wide">
     <div class="label">Mensaje al piloto (solo texto en pantalla, sin sonido)</div>
-    <div class="quick">
-      <button data-msg="BOX">BOX</button>
-      <button data-msg="+1 VUELTA">+1 VUELTA</button>
-      <button data-msg="LENTO">LENTO</button>
-      <button data-msg="ATENCIÓN">ATENCIÓN</button>
-      <button data-msg="TODO OK">TODO OK</button>
-      <button data-msg="AFLOJA">AFLOJA</button>
-    </div>
-    <div style="display:flex; gap:8px">
-      <input id="msg" maxlength="120" placeholder="Mensaje corto">
-      <button class="primary" id="send">Enviar</button>
-    </div>
-    <div class="small" id="sent" style="margin-top:6px">Llega al móvil del piloto en el siguiente intercambio (hasta 10 s o el intervalo que tenga configurado).</div>
+    <div class="small">Un toque en un mensaje rápido lo envía. Se ve durante el sector en que llega y el siguiente.</div>
+    <div class="quick" id="quick"></div>
+
+    <div class="label" style="margin-top:14px">Mensaje personalizado</div>
+    <input id="msg" maxlength="120" placeholder="Escribe un mensaje corto" autocomplete="off">
+    <div class="swatches" id="swatches"></div>
+    <div id="preview"></div>
+    <button class="primary" id="send" style="width:100%">Enviar mensaje</button>
+    <div class="small" id="sent" style="margin-top:6px">Llega al móvil del piloto en el siguiente intercambio (hasta 10 s o el intervalo configurado).</div>
     <div class="err" id="err"></div>
   </section>
 
@@ -105,6 +101,12 @@
       <thead><tr><th>Vuelta</th><th>Tiempo</th><th>Sectores</th></tr></thead>
       <tbody id="laps"><tr><td colspan="3" class="small">Sin vueltas todavía</td></tr></tbody>
     </table>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Posición</div>
+    <div id="map"></div>
+    <label class="small"><input type="checkbox" id="follow" checked style="width:auto"> Seguir al piloto</label>
   </section>
 </main>
 
@@ -124,6 +126,67 @@ function fmt(ms) {
 }
 function sec(ms) { return (ms / 1000).toFixed(2); }
 
+// ---- Colores de mensaje (los mismos que dibuja la app) ----
+const Y = '#FACC15', R = '#EF4444';
+const STRIPES = 'linear-gradient(90deg,' + [Y, R, Y, R, Y, R, Y, R, Y]
+  .map((c, i) => c + ' ' + (i * 100 / 9).toFixed(2) + '% ' + ((i + 1) * 100 / 9).toFixed(2) + '%').join(',') + ')';
+const COLORS = {
+  amarillo: { name: 'Amarillo', bg: Y,         fg: '#141413' },
+  verde:    { name: 'Verde',    bg: '#22C55E', fg: '#0B0D10' },
+  rojo:     { name: 'Rojo',     bg: R,         fg: '#FFFFFF' },
+  azul:     { name: 'Azul',     bg: '#2563EB', fg: '#FFFFFF' },
+  blanco:   { name: 'Blanco',   bg: '#F2F4F7', fg: '#141413' },
+  rayas:    { name: 'Rayas rojas y amarillas (4 rayas)', bg: STRIPES, fg: '#FFFFFF', pill: true }
+};
+const PRESETS = [
+  ['BOX', 'amarillo'],
+  ['TODO OK', 'verde'],
+  ['CUIDADO', 'amarillo'],
+  ['SAFETY CAR', 'amarillo'],
+  ['PISTA DESLIZANTE', 'rayas'],
+  ['SERÁS DOBLADO', 'azul'],
+  ['PILOTOS DELANTE DOBLADOS', 'verde']
+];
+function paint(el, bg, text) {
+  const c = COLORS[bg] || COLORS.amarillo;
+  el.style.background = c.bg;
+  el.style.color = c.fg;
+  el.textContent = '';
+  if (c.pill) {
+    const s = document.createElement('span');
+    s.className = 'pill';
+    s.textContent = text;
+    el.appendChild(s);
+  } else {
+    el.textContent = text;
+  }
+}
+
+let selBg = 'amarillo';
+PRESETS.forEach(([text, bg]) => {
+  const b = document.createElement('button');
+  paint(b, bg, text);
+  b.addEventListener('click', () => send(text, bg));
+  $('quick').appendChild(b);
+});
+Object.keys(COLORS).forEach(key => {
+  const b = document.createElement('button');
+  b.className = 'swatch' + (key === selBg ? ' sel' : '');
+  b.title = COLORS[key].name;
+  b.style.background = COLORS[key].bg;
+  b.addEventListener('click', () => {
+    selBg = key;
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('sel'));
+    b.classList.add('sel');
+    updatePreview();
+  });
+  $('swatches').appendChild(b);
+});
+function updatePreview() { paint($('preview'), selBg, $('msg').value.trim() || 'Vista previa del mensaje'); }
+$('msg').addEventListener('input', updatePreview);
+updatePreview();
+
+// ---- Mapa (al final de la página) ----
 const map = L.map('map').setView([40.4, -3.7], 5);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
 const trail = L.polyline([], { color: '#C6F432', weight: 3 }).addTo(map);
@@ -182,25 +245,23 @@ async function poll() {
   }
 }
 
-async function send(text) {
+async function send(text, bg) {
   text = (text || '').trim();
   if (!text) return;
   $('err').textContent = '';
   try {
     const r = await fetch(db + '/rooms/' + room + '/msgs.json', {
-      method: 'POST', body: JSON.stringify({ text: text, ts: Date.now() })
+      method: 'POST', body: JSON.stringify({ text: text, ts: Date.now(), bg: bg })
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    $('sent').textContent = 'Enviado: «' + text + '» (' + new Date().toLocaleTimeString() + ')';
-    $('msg').value = '';
+    $('sent').textContent = 'Enviado: «' + text + '» (' + (COLORS[bg] || COLORS.amarillo).name.split(' ')[0].toLowerCase() + ', ' + new Date().toLocaleTimeString() + ')';
   } catch (e) {
     $('err').textContent = 'No se pudo enviar: ' + e.message;
   }
 }
 
-document.querySelectorAll('button[data-msg]').forEach(b => b.addEventListener('click', () => send(b.dataset.msg)));
-$('send').addEventListener('click', () => send($('msg').value));
-$('msg').addEventListener('keydown', e => { if (e.key === 'Enter') send($('msg').value); });
+$('send').addEventListener('click', () => { send($('msg').value, selBg); $('msg').value = ''; updatePreview(); });
+$('msg').addEventListener('keydown', e => { if (e.key === 'Enter') { send($('msg').value, selBg); $('msg').value = ''; updatePreview(); } });
 $('cfgLink').addEventListener('click', e => { e.preventDefault(); $('cfg').style.display = 'block'; });
 $('saveCfg').addEventListener('click', () => {
   db = $('dbIn').value.trim().replace(/\/+$/, '');
