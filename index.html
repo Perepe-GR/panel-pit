@@ -11,79 +11,76 @@
   body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   header { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; font-size:13px; color:var(--muted); font-weight:600; }
   .dot { display:inline-block; width:9px; height:9px; border-radius:50%; background:#555; margin-right:6px; }
-  main { display:grid; gap:10px; padding:0 10px 14px; grid-template-columns: 1fr; max-width:1100px; margin:0 auto; }
-  @media (min-width: 800px) { main { grid-template-columns: 1fr 1fr; } .wide { grid-column: 1 / -1; } }
+  main { display:grid; gap:10px; padding:0 10px 14px; grid-template-columns: 1fr; max-width:1200px; margin:0 auto; }
   .card { background:var(--card); border-radius:16px; padding:14px 16px; }
   .label { font-size:12px; letter-spacing:.1em; color:var(--muted); font-weight:700; text-transform:uppercase; }
-  .delta { font-size:92px; font-weight:800; line-height:1; font-variant-numeric: tabular-nums; margin:6px 0; }
-  .row { display:flex; gap:10px; flex-wrap:wrap; }
-  .row > div { flex:1; min-width:90px; }
-  .val { font-size:26px; font-weight:800; font-variant-numeric: tabular-nums; }
   .small { font-size:13px; color:var(--muted); }
-  #map { height:320px; border-radius:12px; margin-top:8px; }
+  #cars { display:grid; gap:10px; grid-template-columns: 1fr; }
+  @media (min-width: 760px) { #cars { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); } }
+  .car { background:var(--card); border-radius:16px; padding:14px 16px; border:2px solid transparent; cursor:pointer; }
+  .car.sel { border-color:#2A313A; }
+  .carhead { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
+  .carname { font-size:18px; font-weight:800; }
+  .driver { font-size:15px; color:var(--text); margin-top:2px; }
+  .delta { font-size:64px; font-weight:800; line-height:1.05; font-variant-numeric: tabular-nums; margin:4px 0; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+  .row > div { flex:1; min-width:80px; }
+  .val { font-size:20px; font-weight:800; font-variant-numeric: tabular-nums; }
+  .stint { margin-top:8px; padding:6px 10px; border-radius:10px; background:#1E242B; font-size:14px; font-weight:700; font-variant-numeric: tabular-nums; }
+  .stint.green { color:var(--green); } .stint.amber { color:var(--amber); } .stint.red { color:#fff; background:#EF4444; }
+  .alert { background:#EF4444; color:#fff; border-radius:6px; padding:1px 8px; font-size:12px; font-weight:800; }
+  .alert.amber { background:var(--amber); color:#141413; }
+  .swap { margin-top:8px; color:#fff; background:#2563EB; border-radius:10px; padding:6px 10px; font-size:14px; font-weight:700; }
+  .tag { background:var(--amber); color:#141413; border-radius:6px; padding:1px 8px; font-size:12px; font-weight:800; }
+  .stale { opacity:.5; }
+  .actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
   table { width:100%; border-collapse:collapse; font-variant-numeric: tabular-nums; font-size:14px; }
   td, th { text-align:left; padding:5px 6px; border-bottom:1px solid #1E242B; }
   th { color:var(--muted); font-size:12px; }
   .best { color:var(--green); font-weight:700; }
-  input[type=text], input:not([type]) { font:inherit; width:100%; border-radius:10px; border:1px solid #2A313A; background:#0B0D10; color:var(--text); padding:10px 12px; }
+  input, select { font:inherit; width:100%; border-radius:10px; border:1px solid #2A313A; background:#0B0D10; color:var(--text); padding:10px 12px; }
+  input[type=checkbox] { width:auto; }
   button { font:inherit; border-radius:10px; border:1px solid #2A313A; background:#1E242B; color:var(--text); padding:10px 12px; font-weight:800; cursor:pointer; }
   button.primary { background:var(--amber); color:#141413; border-color:var(--amber); }
+  button.blue { background:#2563EB; border-color:#2563EB; color:#fff; }
   .quick { display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin:8px 0; }
-  @media (min-width: 800px) { .quick { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 760px) { .quick { grid-template-columns: repeat(4, 1fr); } }
   .quick button { min-height:54px; border:0; }
   .pill { background:rgba(20,20,19,.9); color:#fff; padding:2px 8px; border-radius:6px; }
   .swatches { display:flex; gap:8px; margin:8px 0; flex-wrap:wrap; }
   .swatch { width:44px; height:44px; border-radius:10px; border:3px solid transparent; padding:0; }
   .swatch.sel { border-color:#fff; }
   #preview { border-radius:12px; padding:14px; text-align:center; font-weight:800; font-size:20px; margin:8px 0; min-height:52px; }
+  #map { height:340px; border-radius:12px; margin-top:8px; }
   #cfg { display:none; }
+  #swapDlg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:2000; align-items:center; justify-content:center; padding:14px; }
+  #swapBox { background:var(--card); border-radius:16px; padding:16px; width:100%; max-width:420px; }
+  #swapBox label { display:block; margin-top:10px; }
   .err { color:var(--red); font-size:13px; margin-top:6px; }
-  .demo { background:var(--amber); color:#141413; border-radius:6px; padding:1px 8px; font-size:12px; font-weight:800; margin-left:8px; }
 </style>
 </head>
 <body>
 <header>
-  <div><span class="dot" id="dot"></span><span id="status">Sin configurar</span><span id="demoTag"></span></div>
+  <div><span class="dot" id="dot"></span><span id="status">Sin configurar</span></div>
   <div>Sala <b id="roomShow">-</b> · <a href="#" id="cfgLink" style="color:var(--green)">ajustes</a></div>
 </header>
 
 <main>
-  <section class="card wide" id="cfg">
+  <section class="card" id="cfg">
     <div class="label">Conexión</div>
-    <p class="small">URL de Firebase Realtime Database y código de sala (el mismo que en la app del piloto).</p>
+    <p class="small">URL de Firebase Realtime Database y código de sala (el mismo que en las apps de los pilotos).</p>
     <input id="dbIn" placeholder="https://tu-proyecto-default-rtdb.firebaseio.com" style="margin-bottom:8px">
     <input id="roomIn" placeholder="CÓDIGO DE SALA" style="margin-bottom:8px">
     <button class="primary" id="saveCfg">Guardar y conectar</button>
   </section>
 
-  <section class="card">
-    <div class="label">Delta</div>
-    <div class="delta" id="delta">—.—</div>
-    <div class="row">
-      <div><div class="label">Vuelta</div><div class="val" id="lap">-</div></div>
-      <div><div class="label">Sector</div><div class="val" id="sector">-</div></div>
-      <div><div class="label">Velocidad</div><div class="val" id="kmh">-</div></div>
-      <div><div class="label">Batería</div><div class="val" id="bat">-</div></div>
-    </div>
-  </section>
+  <section id="cars"><div class="card small">Esperando datos de los coches…</div></section>
 
   <section class="card">
-    <div class="label">Tiempos</div>
-    <div class="row" style="margin-top:6px">
-      <div><div class="label">En curso</div><div class="val" id="cur">--:--.---</div></div>
-      <div><div class="label">Última</div><div class="val" id="last">--:--.---</div></div>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <div><div class="label">Mejor</div><div class="val" id="best" style="color:var(--green)">--:--.---</div></div>
-      <div><div class="label">Óptima</div><div class="val" id="opt">--:--.---</div></div>
-    </div>
-    <div class="small" style="margin-top:10px" id="circ">-</div>
-    <div class="small" id="age">-</div>
-  </section>
-
-  <section class="card wide">
     <div class="label">Mensaje al piloto (solo texto en pantalla, sin sonido)</div>
     <div class="small">Un toque en un mensaje rápido lo envía. Se ve durante el sector en que llega y el siguiente.</div>
+    <label class="small" style="display:block;margin-top:10px">Destino</label>
+    <select id="target"><option value="*">Todos los coches</option></select>
     <div class="quick" id="quick"></div>
 
     <div class="label" style="margin-top:14px">Mensaje personalizado</div>
@@ -95,20 +92,41 @@
     <div class="err" id="err"></div>
   </section>
 
-  <section class="card wide">
-    <div class="label">Últimas vueltas</div>
+  <section class="card">
+    <div class="label" id="lapsTitle">Últimas vueltas</div>
     <table>
-      <thead><tr><th>Vuelta</th><th>Tiempo</th><th>Sectores</th></tr></thead>
-      <tbody id="laps"><tr><td colspan="3" class="small">Sin vueltas todavía</td></tr></tbody>
+      <thead><tr><th>Vuelta</th><th>Tiempo</th><th>Sectores</th><th>Piloto</th><th>Stint</th></tr></thead>
+      <tbody id="laps"><tr><td colspan="5" class="small">Sin vueltas todavía</td></tr></tbody>
     </table>
   </section>
 
-  <section class="card wide">
-    <div class="label">Posición</div>
+  <section class="card">
+    <div class="label">Posición de los coches</div>
     <div id="map"></div>
-    <label class="small"><input type="checkbox" id="follow" checked style="width:auto"> Seguir al piloto</label>
+    <label class="small"><input type="checkbox" id="follow" checked> Seguir al coche seleccionado</label>
   </section>
 </main>
+
+<div id="swapDlg">
+  <div id="swapBox">
+    <div class="label">Pedir cambio de piloto</div>
+    <div class="small" id="swapCar"></div>
+    <label class="small">Piloto que entra</label>
+    <input id="swNext" placeholder="Nombre" autocomplete="off">
+    <label class="small">Vueltas planificadas del siguiente stint (0 = las de la app)</label>
+    <input id="swLaps" type="number" min="0" value="0">
+    <label class="small">Tiempo mínimo (min; 0 = el de la app)</label>
+    <input id="swMin" type="number" min="0" value="0">
+    <label class="small">Tiempo máximo (min; 0 = el de la app)</label>
+    <input id="swMax" type="number" min="0" value="0">
+    <div class="actions">
+      <button class="blue" id="swSend">Pedir cambio</button>
+      <button id="swClose">Cerrar</button>
+    </div>
+    <div class="small" style="margin-top:8px">El piloto lo confirma en la app cuando está en boxes.</div>
+    <div class="err" id="swErr"></div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
@@ -119,12 +137,17 @@ let room = (q.get('room') || localStorage.getItem('room') || '').toUpperCase();
 if (q.get('db')) localStorage.setItem('db', db);
 if (q.get('room')) localStorage.setItem('room', room);
 
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 function fmt(ms) {
   if (ms == null) return '--:--.---';
   const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000), t = ms % 1000;
   return m + ':' + String(s).padStart(2, '0') + '.' + String(t).padStart(3, '0');
 }
+function mmss(ms) { const t = Math.floor(ms / 1000); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); }
 function sec(ms) { return (ms / 1000).toFixed(2); }
+const base = () => db + '/rooms/' + room;
 
 // ---- Colores de mensaje (los mismos que dibuja la app) ----
 const Y = '#FACC15', R = '#EF4444';
@@ -139,13 +162,8 @@ const COLORS = {
   rayas:    { name: 'Rayas rojas y amarillas (4 rayas)', bg: STRIPES, fg: '#FFFFFF', pill: true }
 };
 const PRESETS = [
-  ['BOX', 'amarillo'],
-  ['TODO OK', 'verde'],
-  ['CUIDADO', 'amarillo'],
-  ['SAFETY CAR', 'amarillo'],
-  ['PISTA DESLIZANTE', 'rayas'],
-  ['SERÁS DOBLADO', 'azul'],
-  ['PILOTOS DELANTE DOBLADOS', 'verde']
+  ['BOX', 'amarillo'], ['TODO OK', 'verde'], ['CUIDADO', 'amarillo'], ['SAFETY CAR', 'amarillo'],
+  ['PISTA DESLIZANTE', 'rayas'], ['SERÁS DOBLADO', 'azul'], ['PILOTOS DELANTE DOBLADOS', 'verde']
 ];
 function paint(el, bg, text) {
   const c = COLORS[bg] || COLORS.amarillo;
@@ -161,7 +179,6 @@ function paint(el, bg, text) {
     el.textContent = text;
   }
 }
-
 let selBg = 'amarillo';
 PRESETS.forEach(([text, bg]) => {
   const b = document.createElement('button');
@@ -186,82 +203,190 @@ function updatePreview() { paint($('preview'), selBg, $('msg').value.trim() || '
 $('msg').addEventListener('input', updatePreview);
 updatePreview();
 
-// ---- Mapa (al final de la página) ----
-const map = L.map('map').setView([40.4, -3.7], 5);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
-const trail = L.polyline([], { color: '#C6F432', weight: 3 }).addTo(map);
-let marker = null, firstFix = true, lastT = 0;
+// ---- Estado ----
+let cars = {};
+let selCar = null;
+const palette = ['#F5A524', '#C6F432', '#60A5FA', '#F472B6', '#A78BFA', '#34D399', '#FB7185', '#FBBF24'];
+function colorOf(key) { const keys = Object.keys(cars).sort(); return palette[Math.max(0, keys.indexOf(key)) % palette.length]; }
 
 function setStatus(ok, text) {
   $('dot').style.background = ok ? '#C6F432' : '#FF5A5F';
   $('status').textContent = text;
 }
 
-function render(d) {
-  const live = d && d.live;
-  if (!live) { setStatus(true, 'Conectado, esperando datos del piloto'); return; }
-  setStatus(true, 'Conectado');
-  $('demoTag').innerHTML = live.demo ? '<span class="demo">DEMO</span>' : '';
-  const dl = live.delta;
-  $('delta').textContent = dl == null ? '—.—' : (dl > 0 ? '+' : '') + dl.toFixed(3);
-  $('delta').style.color = dl == null || dl <= 0 ? '#C6F432' : '#FF5A5F';
-  $('lap').textContent = live.lap != null ? live.lap : '-';
-  $('sector').textContent = live.sector != null ? live.sector + '/' + live.sectores : '-';
-  $('kmh').textContent = live.kmh != null ? live.kmh + ' km/h' : '-';
-  $('bat').textContent = live.bat != null ? live.bat + ' %' : '-';
-  $('cur').textContent = fmt(live.cur);
-  $('last').textContent = fmt(live.last);
-  $('best').textContent = fmt(live.best);
-  $('opt').textContent = fmt(live.opt);
-  $('circ').textContent = (live.circuito || 'Sin circuito') + (live.v ? ' · app ' + live.v : '');
-  const age = Math.max(0, Math.round((Date.now() - live.t) / 1000));
-  $('age').textContent = 'Último dato hace ' + age + ' s';
-  if (live.lat != null && live.t !== lastT) {
-    lastT = live.t;
-    const p = [live.lat, live.lon];
-    trail.addLatLng(p);
-    if (!marker) marker = L.circleMarker(p, { radius: 8, color: '#F5A524', fillColor: '#F5A524', fillOpacity: 1 }).addTo(map);
-    else marker.setLatLng(p);
-    if (firstFix) { map.setView(p, 16); firstFix = false; }
-    else if ($('follow').checked) map.panTo(p);
-  }
-  const laps = d.laps ? Object.keys(d.laps).sort().map(k => d.laps[k]) : [];
-  if (laps.length) {
-    const bestMs = Math.min(...laps.map(l => l.ms));
-    $('laps').innerHTML = laps.slice(-10).reverse().map(l =>
-      '<tr><td>' + l.n + '</td><td class="' + (l.ms === bestMs ? 'best' : '') + '">' + fmt(l.ms) + '</td><td>' +
-      (l.s || []).map(sec).join(' · ') + '</td></tr>').join('');
-  }
+function carCard(k, c) {
+  const dl = c.delta;
+  const dtxt = dl == null ? '—.—' : (dl > 0 ? '+' : '') + dl.toFixed(3);
+  const dcol = dl == null || dl <= 0 ? '#C6F432' : '#FF5A5F';
+  const age = Math.max(0, Math.round((Date.now() - (c.t || 0)) / 1000));
+  const el = c.stintMs || 0;
+  let stint = 'Stint ' + (c.stint != null ? c.stint : '-') + ' · ' + mmss(el);
+  if (c.maxMs > 0) stint += ' / ' + mmss(c.maxMs);
+  if (c.minMs > 0) stint += ' (mín ' + mmss(c.minMs) + ')';
+  stint += ' · Vueltas ' + (c.stintLaps || 0) + (c.plan > 0 ? '/' + c.plan : '');
+  let cls = '';
+  if (c.maxMs > 0 && el >= c.maxMs) cls = 'red';
+  else if ((c.maxMs > 0 && el >= c.maxMs - 300000) || (c.plan > 0 && (c.stintLaps || 0) >= c.plan)) cls = 'amber';
+  else if (c.minMs > 0 && el >= c.minMs) cls = 'green';
+  const alertCls = c.alert && /BATERÍA BAJA|QUEDAN|PLANIFICADAS/.test(c.alert) ? 'alert amber' : 'alert';
+  return '<div class="car' + (k === selCar ? ' sel' : '') + (age > 30 ? ' stale' : '') + '" data-car="' + esc(k) + '">' +
+    '<div class="carhead"><span class="carname" style="color:' + colorOf(k) + '">' + esc(c.car || k) + '</span>' +
+    '<span>' + (c.demo ? '<span class="tag">DEMO</span> ' : '') + (c.alert ? '<span class="' + alertCls + '">' + esc(c.alert) + '</span>' : '') + '</span></div>' +
+    '<div class="driver">Piloto: <b>' + esc(c.driver || '-') + '</b> · ' + esc(c.circuito || 'sin circuito') + '</div>' +
+    '<div class="delta" style="color:' + dcol + '">' + dtxt + '</div>' +
+    '<div class="row">' +
+      '<div><div class="label">Vuelta</div><div class="val">' + (c.lap != null ? c.lap : '-') + '</div></div>' +
+      '<div><div class="label">Sector</div><div class="val">' + (c.sector != null ? c.sector + '/' + c.sectores : '-') + '</div></div>' +
+      '<div><div class="label">Vel.</div><div class="val">' + (c.kmh != null ? c.kmh : '-') + '</div></div>' +
+      '<div><div class="label">Bat.</div><div class="val">' + (c.bat != null ? c.bat + '%' : '-') + '</div></div>' +
+    '</div>' +
+    '<div class="row" style="margin-top:8px">' +
+      '<div><div class="label">En curso</div><div class="val">' + fmt(c.cur) + '</div></div>' +
+      '<div><div class="label">Última</div><div class="val">' + fmt(c.last) + '</div></div>' +
+      '<div><div class="label">Mejor</div><div class="val" style="color:var(--green)">' + fmt(c.best) + '</div></div>' +
+      '<div><div class="label">Óptima</div><div class="val">' + fmt(c.opt) + '</div></div>' +
+    '</div>' +
+    '<div class="stint ' + cls + '">' + esc(stint) + '</div>' +
+    (c.swap ? '<div class="swap">Cambio pedido → ' + esc(c.swap) + ' (esperando confirmación en boxes)</div>' : '') +
+    '<div class="actions"><button class="blue" data-act="swap" data-car="' + esc(k) + '">Pedir cambio de piloto</button>' +
+    (c.swap ? '<button data-act="cancel" data-car="' + esc(k) + '">Cancelar petición</button>' : '') + '</div>' +
+    '<div class="small" style="margin-top:6px">Último dato hace ' + age + ' s</div>' +
+  '</div>';
 }
 
+function renderCars() {
+  const keys = Object.keys(cars).sort();
+  if (!keys.length) { $('cars').innerHTML = '<div class="card small">Esperando datos de los coches…</div>'; return; }
+  if (!selCar || !cars[selCar]) selCar = keys[0];
+  $('cars').innerHTML = keys.map(k => carCard(k, cars[k])).join('');
+  // destinos de los mensajes
+  const t = $('target'), cur = t.value;
+  t.innerHTML = '<option value="*">Todos los coches</option>' +
+    keys.map(k => '<option value="' + esc(k) + '">' + esc(cars[k].car || k) + '</option>').join('');
+  t.value = [...t.options].some(o => o.value === cur) ? cur : '*';
+  $('lapsTitle').textContent = 'Últimas vueltas · ' + (cars[selCar].car || selCar);
+}
+
+// ---- Mapa (al final) ----
+const map = L.map('map').setView([40.4, -3.7], 5);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+const markers = {}, trails = {}, lastT = {};
+let fitted = false;
+function updateMap() {
+  const pts = [];
+  Object.keys(cars).forEach(k => {
+    const c = cars[k];
+    if (c.lat == null) return;
+    const p = [c.lat, c.lon], col = colorOf(k);
+    pts.push(p);
+    if (!markers[k]) {
+      markers[k] = L.circleMarker(p, { radius: 8, color: col, fillColor: col, fillOpacity: 1 }).addTo(map)
+        .bindTooltip(esc(c.car || k), { permanent: true, direction: 'top' });
+      trails[k] = L.polyline([], { color: col, weight: 3 }).addTo(map);
+    } else {
+      markers[k].setLatLng(p);
+    }
+    if (c.t !== lastT[k]) { lastT[k] = c.t; trails[k].addLatLng(p); }
+  });
+  if (!pts.length) return;
+  if (!fitted) { map.fitBounds(L.latLngBounds(pts).pad(0.3), { maxZoom: 16 }); fitted = true; }
+  else if ($('follow').checked && selCar && cars[selCar] && cars[selCar].lat != null) map.panTo([cars[selCar].lat, cars[selCar].lon]);
+}
+
+// ---- Consultas: solo los datos en vivo cada 3 s; las vueltas, menos a menudo ----
 async function poll() {
   if (!db || !room) return;
   try {
-    const r = await fetch(db + '/rooms/' + room + '.json', { cache: 'no-store' });
+    const r = await fetch(base() + '/live.json', { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    render(await r.json());
+    cars = (await r.json()) || {};
+    setStatus(true, Object.keys(cars).length ? 'Conectado · ' + Object.keys(cars).length + ' coche(s)' : 'Conectado, esperando datos de los coches');
+    renderCars();
+    updateMap();
   } catch (e) {
     setStatus(false, 'Sin conexión con Firebase (' + e.message + ')');
   }
 }
+async function pollLaps() {
+  if (!db || !room || !selCar) return;
+  try {
+    const r = await fetch(base() + '/laps/' + encodeURIComponent(selCar) + '.json?orderBy=%22%24key%22&limitToLast=10', { cache: 'no-store' });
+    if (!r.ok) return;
+    const d = await r.json();
+    const laps = d ? Object.keys(d).sort().map(k => d[k]) : [];
+    if (!laps.length) { $('laps').innerHTML = '<tr><td colspan="5" class="small">Sin vueltas todavía</td></tr>'; return; }
+    const bestMs = Math.min(...laps.map(l => l.ms));
+    $('laps').innerHTML = laps.reverse().map(l =>
+      '<tr><td>' + esc(l.n) + '</td><td class="' + (l.ms === bestMs ? 'best' : '') + '">' + fmt(l.ms) + '</td><td>' +
+      (l.s || []).map(sec).join(' · ') + '</td><td>' + esc(l.d || '') + '</td><td>' + esc(l.st != null ? l.st : '') + '</td></tr>').join('');
+  } catch (e) { /* se reintenta en la siguiente */ }
+}
+function selectCar(k) { selCar = k; renderCars(); updateMap(); pollLaps(); }
 
+// ---- Mensajes ----
 async function send(text, bg) {
   text = (text || '').trim();
   if (!text) return;
   $('err').textContent = '';
+  const t = $('target').value;
+  const targets = t === '*' ? Object.keys(cars) : [t];
+  if (!targets.length) { $('err').textContent = 'No hay coches conectados todavía.'; return; }
   try {
-    const r = await fetch(db + '/rooms/' + room + '/msgs.json', {
+    await Promise.all(targets.map(k => fetch(base() + '/inbox/' + encodeURIComponent(k) + '.json', {
       method: 'POST', body: JSON.stringify({ text: text, ts: Date.now(), bg: bg })
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    $('sent').textContent = 'Enviado: «' + text + '» (' + (COLORS[bg] || COLORS.amarillo).name.split(' ')[0].toLowerCase() + ', ' + new Date().toLocaleTimeString() + ')';
+    }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); })));
+    $('sent').textContent = 'Enviado a ' + (t === '*' ? 'todos' : (cars[t] && cars[t].car) || t) + ': «' + text + '» (' + new Date().toLocaleTimeString() + ')';
   } catch (e) {
     $('err').textContent = 'No se pudo enviar: ' + e.message;
   }
 }
-
 $('send').addEventListener('click', () => { send($('msg').value, selBg); $('msg').value = ''; updatePreview(); });
 $('msg').addEventListener('keydown', e => { if (e.key === 'Enter') { send($('msg').value, selBg); $('msg').value = ''; updatePreview(); } });
+
+// ---- Cambio de piloto ----
+let swCar = null;
+function openSwap(k) {
+  swCar = k;
+  $('swapCar').textContent = 'Coche: ' + ((cars[k] && cars[k].car) || k) + ' · conduce ahora ' + ((cars[k] && cars[k].driver) || '-');
+  $('swErr').textContent = '';
+  $('swapDlg').style.display = 'flex';
+  $('swNext').focus();
+}
+async function sendSwap() {
+  const next = $('swNext').value.trim();
+  if (!next) { $('swErr').textContent = 'Escribe el nombre del piloto que entra.'; return; }
+  const body = {
+    id: Date.now().toString(36), type: 'swap', next: next,
+    laps: parseInt($('swLaps').value, 10) || 0, min: parseInt($('swMin').value, 10) || 0,
+    max: parseInt($('swMax').value, 10) || 0, ts: Date.now()
+  };
+  try {
+    const r = await fetch(base() + '/cmd/' + encodeURIComponent(swCar) + '.json', { method: 'PUT', body: JSON.stringify(body) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    $('swapDlg').style.display = 'none';
+    $('swNext').value = '';
+    poll();
+  } catch (e) {
+    $('swErr').textContent = 'No se pudo enviar: ' + e.message;
+  }
+}
+async function cancelSwap(k) {
+  try {
+    await fetch(base() + '/cmd/' + encodeURIComponent(k) + '.json', { method: 'PUT', body: 'null' });
+    poll();
+  } catch (e) { /* se reintenta al pulsar de nuevo */ }
+}
+$('swSend').addEventListener('click', sendSwap);
+$('swClose').addEventListener('click', () => { $('swapDlg').style.display = 'none'; });
+$('cars').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (b && b.dataset.act === 'swap') { openSwap(b.dataset.car); return; }
+  if (b && b.dataset.act === 'cancel') { cancelSwap(b.dataset.car); return; }
+  const card = e.target.closest('.car');
+  if (card) selectCar(card.dataset.car);
+});
+
+// ---- Ajustes ----
 $('cfgLink').addEventListener('click', e => { e.preventDefault(); $('cfg').style.display = 'block'; });
 $('saveCfg').addEventListener('click', () => {
   db = $('dbIn').value.trim().replace(/\/+$/, '');
@@ -277,6 +402,8 @@ $('roomShow').textContent = room || '-';
 if (!db || !room) $('cfg').style.display = 'block';
 poll();
 setInterval(poll, 3000);
+setInterval(pollLaps, 15000);
+setTimeout(pollLaps, 2500);
 </script>
 </body>
 </html>
